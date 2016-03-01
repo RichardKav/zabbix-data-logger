@@ -58,32 +58,6 @@ public class ZabbixDataSourceAdaptor implements DataSourceAdaptor {
     private ZabbixHostVMFilter hostFilter = new NameBeginsFilter();
 
     /**
-     * The main method.
-     *
-     * @deprecated For testing purposes only
-     * @param args the arguments
-     */
-    public static void main(String[] args) {
-
-        ZabbixDataSourceAdaptor adaptor = new ZabbixDataSourceAdaptor();
-        List<eu.ascetic.zabbixdatalogger.datasource.types.Host> hosts = adaptor.getHostList();
-        for (eu.ascetic.zabbixdatalogger.datasource.types.Host host : hosts) {
-            System.out.println(host);
-        }
-        System.out.println("----------------");
-        for (HostMeasurement measurement : adaptor.getHostData(hosts)) {
-            System.out.println(measurement);
-        }
-        System.out.println("----------------");
-        HostMeasurement measure = adaptor.getHostData(adaptor.getHostByName("testnode1"));
-        System.out.println(measure);
-        System.out.println("----------------");
-        for (eu.ascetic.zabbixdatalogger.datasource.types.Host host : hosts) {
-            System.out.println("Host: " + host.getHostName() + " Watts In Use: " + adaptor.getLowestHostPowerUsage(host));
-        }
-    }
-
-    /**
      * This returns a host given its unique name.
      *
      * @param hostname The name of the host to get.
