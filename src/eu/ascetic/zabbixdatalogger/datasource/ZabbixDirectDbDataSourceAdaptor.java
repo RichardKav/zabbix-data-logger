@@ -74,11 +74,14 @@ public class ZabbixDirectDbDataSourceAdaptor extends MySqlDatabaseConnector impl
      */
     private Connection connection;
     /**
-     * This query lists all hosts data items.
-     * status <> 3 excludes templates
-     * available = 0 is for templates, available = 1 = true available = 2 = false
+     * This query lists all hosts data items. status <> 3 excludes templates 0 -
+     * not available (templates are in this category), 1 - available, 2 -
+     * unknown.
+     *
+     * see:
+     * https://www.zabbix.com/documentation/2.0/manual/config/items/itemtypes/internal
      */
-    private static final String ALL_ZABBIX_HOSTS = "SELECT hostid, host FROM hosts WHERE status <> 3 AND available = 1";
+    private static String ALL_ZABBIX_HOSTS = "SELECT hostid, host FROM hosts WHERE status <> 3";
     /**
      * This query searches for a named host and provides it's current latest
      * items.
@@ -132,6 +135,11 @@ public class ZabbixDirectDbDataSourceAdaptor extends MySqlDatabaseConnector impl
      */
     private static String databasePassword = "readonly";
     /**
+     * Indicates if the host has a Zabbix agent running. (Note: IPMI data only
+     * hosts would not appear as available.)
+     */
+    private static boolean onlyAvailableHosts = false;
+    /**
      * The filter string, if a host/VM begins with this then it is a host, if
      * isHost equals true.
      */
@@ -162,7 +170,13 @@ public class ZabbixDirectDbDataSourceAdaptor extends MySqlDatabaseConnector impl
             databaseURL = config.getString("data.logger.zabbix.db.url", databaseURL);
             config.setProperty("data.logger.zabbix.db.url", databaseURL);
             databaseDriver = config.getString("data.logger.zabbix.db.driver", databaseDriver);
-            config.setProperty("data.logger.zabbix.db.driver", databaseDriver);
+            try {
+                Class.forName(databaseDriver);
+            } catch (ClassNotFoundException ex) {
+                //If the driver is not found on the class path revert to MariaDB.
+                databaseDriver = "org.mariadb.jdbc.Driver";
+            }
+            config.setProperty("iaas.energy.modeller.zabbix.db.driver", databaseDriver);
             databasePassword = config.getString("data.logger.zabbix.db.password", databasePassword);
             config.setProperty("data.logger.zabbix.db.password", databasePassword);
             databaseUser = config.getString("data.logger.zabbix.db.user", databaseUser);
@@ -171,6 +185,11 @@ public class ZabbixDirectDbDataSourceAdaptor extends MySqlDatabaseConnector impl
             config.setProperty("data.logger.filter.begins", begins);
             isHost = config.getBoolean("data.logger.filter.isHost", isHost);
             config.setProperty("data.logger.filter.isHost", isHost);
+            onlyAvailableHosts = config.getBoolean("iaas.energy.zabbix.only.available.hosts", onlyAvailableHosts);
+            config.setProperty("iaas.energy.zabbix.only.available.hosts", onlyAvailableHosts);
+            if (onlyAvailableHosts) {
+                ALL_ZABBIX_HOSTS = ALL_ZABBIX_HOSTS + " AND h.available = 1";
+            }
 
         } catch (ConfigurationException ex) {
             DB_LOGGER.log(Level.SEVERE, "Error loading the configuration of the Zabbix data logger");
