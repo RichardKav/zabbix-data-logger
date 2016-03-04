@@ -176,7 +176,7 @@ public class ZabbixDirectDbDataSourceAdaptor extends MySqlDatabaseConnector impl
                 //If the driver is not found on the class path revert to MariaDB.
                 databaseDriver = "org.mariadb.jdbc.Driver";
             }
-            config.setProperty("iaas.energy.modeller.zabbix.db.driver", databaseDriver);
+            config.setProperty("data.logger.zabbix.db.driver", databaseDriver);
             databasePassword = config.getString("data.logger.zabbix.db.password", databasePassword);
             config.setProperty("data.logger.zabbix.db.password", databasePassword);
             databaseUser = config.getString("data.logger.zabbix.db.user", databaseUser);
@@ -185,8 +185,8 @@ public class ZabbixDirectDbDataSourceAdaptor extends MySqlDatabaseConnector impl
             config.setProperty("data.logger.filter.begins", begins);
             isHost = config.getBoolean("data.logger.filter.isHost", isHost);
             config.setProperty("data.logger.filter.isHost", isHost);
-            onlyAvailableHosts = config.getBoolean("iaas.energy.zabbix.only.available.hosts", onlyAvailableHosts);
-            config.setProperty("iaas.energy.zabbix.only.available.hosts", onlyAvailableHosts);
+            onlyAvailableHosts = config.getBoolean("data.logger.zabbix.only.available.hosts", onlyAvailableHosts);
+            config.setProperty("data.logger.zabbix.only.available.hosts", onlyAvailableHosts);
             if (onlyAvailableHosts) {
                 ALL_ZABBIX_HOSTS = ALL_ZABBIX_HOSTS + " AND h.available = 1";
             }
